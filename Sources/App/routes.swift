@@ -2,19 +2,25 @@ import Vapor
 
 /// Register your application's routes here.
 public func routes(_ router: Router) throws {
-    // Basic "It works" example
-    router.get { req in
-        return "It works!"
-    }
-    
-    // Basic "Hello, world!" example
-    router.get("hello") { req in
-        return "Hello, world!"
+
+    struct Counter: Content {
+        var value: Int = 0
     }
 
-    // Example of configuring a controller
-    let todoController = TodoController()
-    router.get("todos", use: todoController.index)
-    router.post("todos", use: todoController.create)
-    router.delete("todos", Todo.parameter, use: todoController.delete)
+    // global state
+    var state: Counter = Counter()
+
+    // state getter
+    router.get("counter") { req -> Counter in
+        return state
+    }
+
+    // state setter
+    router.post("counter") { req -> HTTPStatus in
+        let nextState = try req.content.syncDecode(Counter.self)
+
+        state = nextState
+
+        return .ok
+    }
 }
