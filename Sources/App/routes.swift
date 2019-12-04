@@ -4,31 +4,29 @@ import Logging
 /// Register your application's routes here.
 public func routes(_ router: Router) throws {
 
-    struct Counter: Content {
-        var value: Int = 0
+    struct CountResponse: Content {
+        let count: Int
     }
 
-    // global state
-    var state: Counter = Counter()
+    let cache = ExpiringKeysCache()
 
-    // state getter
-    router.get("counter") { req -> Counter in
+    router.get("touch", String.parameter) { req -> HTTPStatus in
+        let key: String = try req.parameters.next()
         let logger = try req.make(Logger.self)
 
-        logger.debug("Returning state \(state)")
+        logger.info("Putting \(key) to cache ...")
 
-        return state
-    }
-
-    // state setter
-    router.post("counter") { req -> HTTPStatus in
-        let logger = try req.make(Logger.self)
-        let nextState = try req.content.syncDecode(Counter.self)
-
-        logger.debug("Change state \(state) to \(nextState)")
-
-        state = nextState
+        let _ = cache.touch(key: key)
 
         return .ok
+    }
+
+    router.get("count") { req -> CountResponse in
+        let logger = try req.make(Logger.self)
+        let keysCount = cache.keysCount()
+
+        logger.info("Number of valid keys: \(keysCount)")
+
+        return CountResponse(count: keysCount )
     }
 }

@@ -2,36 +2,28 @@
 
 Sample app built in Vapor
 
-## Get counter value
+## Put a key into cache
 
 ### REST command
 
-`GET /counter`
+`GET /touch/<key>`
 
 ### Response
 
-```json
-{
-  "value": 0
-}
-```
+HTTP Status 200 is returned along with empty body
 
-## Set counter value
-
-To set value, just push a JSON object having just one field `value`:
+## Get active keys size
 
 ### REST command
 
-`POST /counter`
-
-Request body:
-
-```json
-{
-  "value": 0
-}
-```
+`GET /count`
 
 ### Response
 
-Empty response with HTTP 200 Status Code
+JSON object is returned with a single property `count`
+
+```json
+{
+  "count": 10
+}
+```
